@@ -1,7 +1,6 @@
-# gone_to_plaid
+# Gone to Plaid
 A plaid pattern generator
 # Usage
-## Windows
 `python gone_to_plaid.py -m <mode>`
 
 mode options: 
