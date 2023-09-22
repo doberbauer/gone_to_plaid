@@ -1,7 +1,9 @@
 # Gone to Plaid
 A plaid pattern generator
 # Usage
-`python gone_to_plaid.py -m <mode>`
+``` Command Prompt
+python gone_to_plaid.py -m <mode>
+```
 
 mode options: 
 - gingham
