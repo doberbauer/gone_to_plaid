@@ -92,7 +92,9 @@ def _plaid():
     bkg_color = _hsv2rgb(bkg_hue,sat,0.8)
     box_color = _hsv2rgb(box_hue,sat,0.5)
     thick_color = _hsv2rgb(thick_hue,sat,0.60)
-    thin_color = _hsv2rgb(thick_hue,0.15,0.95)
+    
+    thin_vals = [0.95,0.60,0.05]
+    thin_color = _hsv2rgb(thick_hue,0.15,thin_vals[np.random.randint(2)])
     
     img = Image.new("RGBA",(w,h),bkg_color)
     draw = ImageDraw.Draw(img)
@@ -127,8 +129,9 @@ def _plaid():
         hline2 = (0,line_offset+box_offset*2,w,line_offset+box_offset*2)
         draw.line(hline2,fill=thick_color,width=int(box_offset/4+1))
     
-    box = (line_offset,line_offset,line_offset+box_offset,line_offset+box_offset)
-    draw.rectangle(box,fill=box_color)
+    if np.random.randint(2):
+        box = (line_offset,line_offset,line_offset+box_offset,line_offset+box_offset)
+        draw.rectangle(box,fill=box_color)
 
     if np.random.randint(2):
         direction = np.random.randint(2)
