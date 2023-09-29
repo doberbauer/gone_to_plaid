@@ -21,19 +21,32 @@ def main(mode):
 
 
 def _gingham(w=1000,h=1000):
+    # Gingham is defined by a white background and evenly spaced colored lines. 
+    # Horizontal and vertical lines have different saturation values
+    # Where lines intersect the color is darker still
+    # In this implementation I've chosen to use rectangles instead of lines.
+
     image = Image.new("RGBA", (w,h), "white")
     draw = ImageDraw.Draw(image)
     
+
     spacing = np.linspace(0,w,20)
-    dif = spacing[1]
+    dif = spacing[1] #This is the difference in spacing between each value of spacing
     
-    hue = np.random.randint(0,359)/100
+    # The hue is generated randomly as a value between 0 and 359 (the color wheel being 360 degrees)
+    # This value is divided by 100 since colorsys represents hsv as percentages
+    hue = np.random.randint(0,359)/100 
     
     
+    # Colors for background, and the 3 different colored boxes are generated
     color1 = _hsv2rgb(hue,0,1)
     color2 = _hsv2rgb(hue,0.5,1)
     color3 = _hsv2rgb(hue,0.25,1)
     color4 = _hsv2rgb(hue,0.75,1)
+
+    # Rows and columns are looped through. Colors are alternated based on whether the row
+    # index is even or odd.
+
     for row in range(len(spacing)):
         if row%2 == 0:
             colors = [color1,color2]
@@ -42,7 +55,9 @@ def _gingham(w=1000,h=1000):
         for col in range(len(spacing)):
             shape = (spacing[col],spacing[row],spacing[col]+dif,spacing[row]+dif)
             draw.rectangle(shape,fill=colors[col%2])
-             
+
+    # It's randomly decided whether to additionally draw diagonal lines across the whole image
+    # These diagonal lines are usually present in some fashion in plaid patterns
     if np.random.randint(2):
         dlines = _diagonal_lines(w*4,h*4,color="white",n=500)
         image.paste(dlines,(0,0),dlines)
@@ -51,18 +66,30 @@ def _gingham(w=1000,h=1000):
     
 
 def _buffalo(w=1000,h=1000):
+    # Buffalo plaid is similar to gingham. It's defined by a colored background and
+    # black/gray lines. Where the lines intersect they're usually darker.
+    # Like gingham, horizontal and vertical lines typically have different intensities.
+    # In this implementation I've chosen to use rectangles instead of lines.
+
     image = Image.new("RGBA", (w,h), "white")
     draw = ImageDraw.Draw(image)
     
     spacing = np.linspace(0,w,20)
-    dif = spacing[1]
+    dif = spacing[1] #This is the difference in spacing between each value of spacing
     
+    # The hue is generated randomly as a value between 0 and 359 (the color wheel being 360 degrees)
+    # This value is divided by 100 since colorsys represents hsv as percentages
     hue = np.random.randint(0,359)/100
     
+    # Colors for background, and the 3 different colored boxes are generated
     color1 = _hsv2rgb(hue,1,1)
     color2 = _hsv2rgb(hue,1,0.5)
     color3 = _hsv2rgb(hue,1,0.25)
     color4 = _hsv2rgb(hue,1,0)
+
+    # Rows and columns are looped through. Colors are alternated based on whether the row
+    # index is even or odd.
+
     for row in range(len(spacing)):
         if row%2 == 0:
             colors = [color1,color2]
@@ -71,7 +98,9 @@ def _buffalo(w=1000,h=1000):
         for col in range(len(spacing)):
             shape = (spacing[col],spacing[row],spacing[col]+dif,spacing[row]+dif)
             draw.rectangle(shape,fill=colors[col%2])
-               
+
+    # It's randomly decided whether to additionally draw diagonal lines across the whole image
+    # These diagonal lines are usually present in some fashion in plaid patterns   
     if np.random.randint(2):
         dlines = _diagonal_lines(w*4,h*4,color=color1,n=500)
         image.paste(dlines,(0,0),dlines)
@@ -79,32 +108,49 @@ def _buffalo(w=1000,h=1000):
     _save_pattern(image)
 
 def _plaid():
+    # Plaid patterns are diverse. This implementation uses rules which generate only
+    # a subset of the plaid patterns that exist in the wild. 
     
-    w = 250
+    # Background and major element colors are generated randomly
+    # All other elements are procedurally generated to be harmoneous
+    # with major element colors. They can be complementary or analogous.
+
+    # Height and width here describe the initial tile dimensions
+    # This tile will be copied 3 times, resulting in an image whose
+    # dimensions are (w*4,h*4)
+    w = 250 
     h = 250
-    sat = np.random.random()
-    bkg_hue = np.random.randint(0,359)/100
-    box_hue = np.random.randint(0,359)/100
+
+
+    sat = np.random.random() # Random saturation value between 0 and 1
+
+    #Background and box hues are randomly generated integers between 0 and 359 (colorwheel being 360 degrees)
+    bkg_hue = np.random.randint(0,359)
+    box_hue = np.random.randint(0,359)
     
+    # This is a list of possible colorwheel degree differences
+    # 30 and -30 are analogous colors
+    # 180 and -180 are complementary colors
     degree_diff = [30,-30,180,-180]
+
+    # Thick line hues are defined by the box hue minus a randomly decided degree difference
     thick_hue = box_hue-degree_diff[np.random.randint(4)]
     
-    bkg_color = _hsv2rgb(bkg_hue,sat,0.8)
-    box_color = _hsv2rgb(box_hue,sat,0.5)
-    thick_color = _hsv2rgb(thick_hue,sat,0.60)
+    # RGB colors are calculated from the above HSV.
+    bkg_color = _hsv2rgb(bkg_hue/100,sat,0.8)
+    box_color = _hsv2rgb(box_hue/100,sat,0.5)
+    thick_color = _hsv2rgb(thick_hue/100,sat,0.60)
     
+    # Thin lines can be 95%, 60% and 0.5% bright
+    # Brightness is randomly picked from the list.
     thin_vals = [0.95,0.60,0.05]
-    thin_color = _hsv2rgb(thick_hue,0.15,thin_vals[np.random.randint(2)])
+    thin_color = _hsv2rgb(thick_hue/100,0.15,thin_vals[np.random.randint(2)])
     
     img = Image.new("RGBA",(w,h),bkg_color)
     draw = ImageDraw.Draw(img)
     
     line_offset = np.random.randint(25,50)
-    line_offset = np.random.randint(25,50)
-    
     line_offset -= line_offset % 5
-    line_offset -= line_offset % 5
-    
     
     box_offset = np.random.randint(20,40)
     if box_offset %2 !=0:
@@ -129,10 +175,13 @@ def _plaid():
         hline2 = (0,line_offset+box_offset*2,w,line_offset+box_offset*2)
         draw.line(hline2,fill=thick_color,width=int(box_offset/4+1))
     
+    # Coinflip whether to draw boxes at line intersections
     if np.random.randint(2):
         box = (line_offset,line_offset,line_offset+box_offset,line_offset+box_offset)
         draw.rectangle(box,fill=box_color)
 
+    # Coinflip whether to draw an additional line
+    # Coinflip whether the line is drawn horizontal or vertical
     if np.random.randint(2):
         direction = np.random.randint(2)
         if direction:
@@ -140,10 +189,13 @@ def _plaid():
         else:
             extra_line = (line_offset*2+box_offset*2,0,line_offset*2+box_offset*2,h)
         draw.line(extra_line,fill=thick_color,width=(int(box_offset/4)))
+
+    # Additional thin horizontal and vertical lines are drawn
+    # The number of lines is randomly chosen between 3 and 5
+    # There's an additional coinflip to add additional spacing to the line offsets
     num_lines = np.random.randint(3,6)
     if num_lines %2 !=0:
-        num_lines +=1
-        
+        num_lines +=1  
     spacing = np.round(np.linspace(0-box_offset/2,box_offset+box_offset/2,num_lines)).astype(int)
     if np.random.randint(2):
         line_offset *=4
@@ -170,18 +222,23 @@ def _plaid():
     tile.paste(img3,(w*2,0))
     tile.paste(img3,(0,h*2))
     tile.paste(img3,(w*2,h*2))
+    
+    # Coinflip whether to additionally draw diagonal lines across the whole image
+    # These diagonal lines are usually present in some fashion in plaid patterns 
     if np.random.randint(2):
         dlines = _diagonal_lines(w*4,h*4,color=bkg_color,n=250)
         tile.paste(dlines,(0,0),dlines)
     tile.show()
     _save_pattern(tile)
-    # Generate a random UUID (Universally Unique Identifier)
+    
     
 
 def _hsv2rgb(h,s,v):
+    # Utility function that wraps colorsys.hsv_to_rgb
     return tuple(round(i * 255) for i in colorsys.hsv_to_rgb(h,s,v))
 
 def _diagonal_lines(w,h,n=40,color=(255,255,255)):
+    # Utility function to draw diagonal lines present in plaid patterns
     xspacing = np.linspace(0,w,n)
     yspacing = np.linspace(0,h,n)
     img = Image.new("RGBA",(w,h),(0,0,0,0))
@@ -195,6 +252,9 @@ def _diagonal_lines(w,h,n=40,color=(255,255,255)):
     return img
 
 def _save_pattern(image):
+    # Utility function to generate a random unique filename and save the image
+    
+    # Generate a random UUID (Universally Unique Identifier)
     random_uuid = uuid.uuid4()
 
     # Create a random file name by converting the UUID to a string
